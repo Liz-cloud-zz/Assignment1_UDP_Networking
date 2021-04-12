@@ -30,7 +30,7 @@ public class Client {
                     //Step9: reply message from client1 through server to verify that the message has been received
                     int server_port= pktReceive.getPort();
                     InetAddress server_ip=pktReceive.getAddress();
-                    System.out.println("Type the client name in this form [#client_name#] Client IP Address as numerical digits in this form [000.000.000.000] and message you want to send to client:");
+                    System.out.println("Please send the name of the destination client,Client IP Address,message this form:[#client_name#,000.000.000.000,message] you want to send to client:");
                     String message=in.nextLine();
                     pktReceive = new DatagramPacket(message.getBytes(), message.length(), server_ip, server_port);
                     sktReceive.send(pktReceive);
@@ -62,7 +62,7 @@ public class Client {
                     DatagramSocket sktSend = new DatagramSocket();
                     while (running) {
                         Scanner in = new Scanner(System.in);
-                        System.out.println("Establish connection to Server by typing a your client name in this form [#client_name#] and message:");
+                        System.out.println("Establish connection to Server by typing a your client name,message  in this form [#client_name#,message]:");
                         String message = in.nextLine();
                         try {
                             //Step1: send message to server to establish connection

@@ -65,11 +65,10 @@ public class Server {
                     DatagramPacket pktReceive = new DatagramPacket(buf, buf.length); //create temporary empty packet
                     sktReceive.receive(pktReceive); //receive packet from socket and store in packet
                     message = new String(pktReceive.getData(), 0, pktReceive.getLength()); //convert packet to message string
-                     start=message.indexOf('#');
-                    end=message.lastIndexOf('#');
-                    client_name=message.substring(start,end+1);
-                    String connector=message.substring(end+1);
-                    System.out.println("Connection established! The client name is: " + client_name+" message :"+connector); //output message received
+                    String []strings=message.split(",");
+                    client_name=strings[0];//get client name
+                    to_send=strings[1];//message  to send to client2
+                    System.out.println("Connection established! The client name is: " + client_name+" message :"+to_send); //output message received
 
                     //Step3: verify to 1st client that you have seen the message by sending a message
                     InetAddress clientAddress = pktReceive.getAddress();//client1 ip
@@ -77,7 +76,7 @@ public class Server {
                     Connector c1=new Connector(clientPort,clientAddress.getHostAddress());//make a Connector Object
                     hashMap.put(client_name,c1);//add the client to the client list
                     client_names.add(client_name);//add the client name to client name list
-                    String quote = "Message Received.Please send the name of the destination client in this form [#client_name#], Client IP Address as numerical digits in this form [000.000.000.000] and message you want to send to client: ";
+                    String quote = "Message Received.Please send the name of the destination client,Client IP Address,message this form:[#client_name#,000.000.000.000,message] you want to send to client: ";
                     byte[] buffer = quote.getBytes();
                     if(client_names.contains(client_name)) {
                         Connector to_connect = hashMap.get(client_name);
@@ -91,13 +90,10 @@ public class Server {
                     // add the client to the hash map
                     sktReceive.receive(pktReceive); //receive packet from socket and store in packet
                     message= new String(pktReceive.getData(), 0, pktReceive.getLength()); //convert packet to message string
-                    start=message.indexOf('#');
-                    end=message.lastIndexOf('#');
-                    client_name=message.substring(start,end+1);//get client name
-                    ipAddress=message.replace("[^0-9]","");//get ip address
-                    to_send=message.substring(end+1);//message  to send to client2
+                    String []strings3=message.split(",");
+                    client_name=strings3[0];//get client name
+                    to_send=strings3[1];//message  to send to client2
                     System.out.println("Client name is " + client_name+" "+"message to be send is:"+to_send); //output message received
-
                     int port=8090;//port of 2nd client to receive message
                     Connector c=new Connector(port,ipAddress);
                     hashMap.put(client_name,c);
@@ -119,11 +115,10 @@ public class Server {
                         // If second client doesnt exist send broadcast message to all users
                         String reply="Reply from 2nd client: "+delivered;
                         byte[] buffe = reply.getBytes();
-                        start=message.indexOf('#');
-                        end=message.lastIndexOf('#');
-                        ipAddress=message.replace("[^0-9]","");//get ip address
-                        client_name=message.substring(start,end+1);//get client name
-                        to_send=message.substring(end+1);//message  to send to client2
+                        String []strings2=message.split(",");
+                        client_name=strings2[0];//get client name
+                        ipAddress=strings2[1];//get ip address
+                        to_send=strings2[2];//message  to send to client2
                         if(client_names.contains(client_name)){
                             Connector c2=hashMap.get(client_name);
                             DatagramPacket response1 = new DatagramPacket(buffe, buffe.length, c2.getAddress(), c2.getPort_number());
