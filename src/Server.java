@@ -97,10 +97,10 @@ public class Server {
                     client_names.add(client_name);
 
                     //Step7: forward the message to the 2nd client
+                    byte[] b=to_send.getBytes();
                     if(client_names.contains(client_name)){
                         Connector to_connect=hashMap.get(client_name);
-                        byte[] b=to_send.getBytes();
-                        DatagramPacket forward = new DatagramPacket(b, b.length, to_connect.getAddress(),to_connect.getPort_number() );
+                        DatagramPacket forward = new DatagramPacket(b, b.length, to_connect.getAddress(),to_connect.getPort_number());
                         sktReceive.send(forward);
 
                         //Step10: 2nd client replies to the message you send to send to client 1
