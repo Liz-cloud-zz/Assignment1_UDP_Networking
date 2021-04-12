@@ -94,7 +94,6 @@ public class Server {
                     ipAddress=strings3[1];
                     to_send=strings3[2];//message  to send to client2
                     System.out.println("Client name is " + client_name+" "+"message to be send is:"+to_send); //output message received
-                    //int port=8090;//port of 2nd client to receive message
                     Connector c=new Connector(clientPort,ipAddress);
                     hashMap.put(client_name,c);
                     client_names.add(client_name);
@@ -124,7 +123,7 @@ public class Server {
                             DatagramPacket response1 = new DatagramPacket(buffe, buffe.length, c2.getAddress(), c2.getPort_number());
                             sktReceive.send(response1);
                         }else {//if its not an existing client add it to the client list then send message to it
-                            Connector c3=new Connector(8080,ipAddress);
+                            Connector c3=new Connector(clientPort,ipAddress);
                             hashMap.put(client_name,c3);
                             client_names.add(client_name);
                             if(client_names.contains(client_name)) {
