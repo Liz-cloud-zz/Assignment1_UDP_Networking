@@ -1,6 +1,8 @@
 import java.io.IOException;
 import java.net.*;
+import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Scanner;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -9,10 +11,10 @@ public class Server {
     public static int PORT=8080;
     public static volatile boolean running;
     public static HashMap<String, Connector > hashMap =new HashMap<>();//Hash Map to store the different clients to  be contacted
-    public static ArrayList<String> client_names=new ArrayList<>();//aaraylist for the names of the clients
+    public static ArrayList<String> client_names=new ArrayList<>();//arraylist for the names of the clients
     public static void end(){
         running=false;
-    }
+    }//to terminate thread for connection connection
 
 
 //    private static class Sender implements Runnable {
@@ -48,6 +50,12 @@ public class Server {
     private static class Receiver implements Runnable { //runnable class to allow user to constantly be able to receive packets
         @Override
         public void run() {
+            int start=0;
+            int end=0;
+            String client_name="";
+            String to_send="";
+            String message="";
+            String ipAddress="";
             running=true;
             try {
                 while (running) {
@@ -56,30 +64,42 @@ public class Server {
                     byte[] buf = new byte[1024]; //create empty byte buffer
                     DatagramPacket pktReceive = new DatagramPacket(buf, buf.length); //create temporary empty packet
                     sktReceive.receive(pktReceive); //receive packet from socket and store in packet
-                    String msg = new String(pktReceive.getData(), 0, pktReceive.getLength()); //convert packet to message string
-                    System.out.println("Connection established! The client said: " + msg); //output message received
+                    message = new String(pktReceive.getData(), 0, pktReceive.getLength()); //convert packet to message string
+                     start=message.indexOf('#');
+                    end=message.lastIndexOf('#');
+                    client_name=message.substring(start,end+1);
+                    String connector=message.substring(end+1);
+                    System.out.println("Connection established! The client name is: " + client_name+" message :"+connector); //output message received
 
                     //Step3: verify to 1st client that you have seen the message by sending a message
                     InetAddress clientAddress = pktReceive.getAddress();//client1 ip
                     int clientPort = pktReceive.getPort();//client1 port number
-                    String quote = "Message Received.Please send the name of the client you want your message send to: ";
+                    Connector c1=new Connector(clientPort,clientAddress.getHostAddress());//make a Connector Object
+                    hashMap.put(client_name,c1);//add the client to the client list
+                    client_names.add(client_name);//add the client name to client name list
+                    String quote = "Message Received.Please send the name of the destination client in this form [#client_name#], Client IP Address as numerical digits in this form [000.000.000.000] and message you want to send to client: ";
                     byte[] buffer = quote.getBytes();
-                    DatagramPacket response = new DatagramPacket(buffer, buffer.length, clientAddress, clientPort);
-                    sktReceive.send(response);
+                    if(client_names.contains(client_name)) {
+                        Connector to_connect = hashMap.get(client_name);
+                        DatagramPacket response = new DatagramPacket(buffer, buffer.length, to_connect.getAddress(), to_connect.getPort_number());
+                        sktReceive.send(response);
+                    }else {
+                        System.out.println("unknown client name!");
+                    }
 
                     //Step6: get the client name from user and the message to be sent
                     // add the client to the hash map
                     sktReceive.receive(pktReceive); //receive packet from socket and store in packet
-                    String message= new String(pktReceive.getData(), 0, pktReceive.getLength()); //convert packet to message string
-                    int start=message.indexOf('#');
-                    int end=message.lastIndexOf('#');
-                    String client_name=message.substring(start,end+1);
-                    String to_send=message.substring(end+1);
+                    message= new String(pktReceive.getData(), 0, pktReceive.getLength()); //convert packet to message string
+                    start=message.indexOf('#');
+                    end=message.lastIndexOf('#');
+                    client_name=message.substring(start,end+1);//get client name
+                    ipAddress=message.replace("[^0-9]","");//get ip address
+                    to_send=message.substring(end+1);//message  to send to client2
                     System.out.println("Client name is " + client_name+" "+"message to be send is:"+to_send); //output message received
 
-                    String ip="192.168.1.52";//ip address of 2nd client to receive message
                     int port=8090;//port of 2nd client to receive message
-                    Connector c=new Connector(port,ip);
+                    Connector c=new Connector(port,ipAddress);
                     hashMap.put(client_name,c);
                     client_names.add(client_name);
 
@@ -92,26 +112,42 @@ public class Server {
 
                         //Step10: 2nd client replies to the message you send to send to client 1
                         sktReceive.receive(pktReceive); //receive packet from socket and store in packet
-                       String delivered = new String(pktReceive.getData(), 0, pktReceive.getLength()); //convert packet to message string
+                        String delivered = new String(pktReceive.getData(), 0, pktReceive.getLength()); //convert packet to message string
                         System.out.println("Client2 says: " + delivered); //output message received
 
                         //Step11: forward the message from second client to 1st client
-//                        String  x = "received received";
+                        // If second client doesnt exist send broadcast message to all users
                         String reply="Reply from 2nd client: "+delivered;
                         byte[] buffe = reply.getBytes();
-                        DatagramPacket response1 = new DatagramPacket(buffe, buffe.length, InetAddress.getByName("192.168.1.1"), clientPort);
-                        sktReceive.send(response1);
-
+                        start=message.indexOf('#');
+                        end=message.lastIndexOf('#');
+                        client_name=message.substring(start,end+1);//get client name
+                        to_send=message.substring(end+1);//message  to send to client2
+                        if(client_names.contains(client_name)){
+                            Connector c2=hashMap.get(client_name);
+                            DatagramPacket response1 = new DatagramPacket(buffe, buffe.length, c2.getAddress(), c2.getPort_number());
+                            sktReceive.send(response1);
+                        }else {
+                            //send broadcast if unknown client is being requested
+                            message="Unknown client name :"+client_name+"client is probably off line";
+                            byte[] feedback=message.getBytes();
+                           for (Connector connector1: hashMap.values()){
+                               DatagramPacket response1 = new DatagramPacket(feedback, feedback.length, connector1.getAddress(), connector1.getPort_number());
+                               sktReceive.send(response1);
+                           }
+                        }
                     }
                     else {
-                        //if client doesnt extist tell the user that it doesn't exist
-                        String  x = "client does not exist";
-                        byte[] buffe = x.getBytes();
-                        DatagramPacket response1 = new DatagramPacket(buffer, buffer.length, clientAddress, clientPort);
-                        sktReceive.send(response1);
+                        //if client doesnt exist tell the all users that it doesn't exist
+                        message="Unknown client name :"+client_name+"client is probably off line";
+                        byte[] feedback=message.getBytes();
+                        for (Connector connector1: hashMap.values()){
+                            DatagramPacket response1 = new DatagramPacket(feedback, feedback.length, connector1.getAddress(), connector1.getPort_number());
+                            sktReceive.send(response1);
+                        }
                     }
                     sktReceive.close();
-                    if (msg.equals("end"))
+                    if (message.equals("end"))
                         end();
 //                    Thread.sleep((long)15);//end loop (and thread) if server says end
                 }

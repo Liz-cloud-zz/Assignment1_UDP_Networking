@@ -30,7 +30,7 @@ public class Client {
                     //Step9: reply message from client1 through server to verify that the message has been received
                     int server_port= pktReceive.getPort();
                     InetAddress server_ip=pktReceive.getAddress();
-                    System.out.println("Enter verification message that the message has been received from client1");
+                    System.out.println("Type the client name in this form [#client_name#] and message you want to send back:");
                     String message=in.nextLine();
                     pktReceive = new DatagramPacket(message.getBytes(), message.length(), server_ip, server_port);
                     sktReceive.send(pktReceive);
@@ -62,7 +62,7 @@ public class Client {
                     DatagramSocket sktSend = new DatagramSocket();
                     while (running) {
                         Scanner in = new Scanner(System.in);
-                        System.out.println("Establish connection to Server by typing a message:");
+                        System.out.println("Establish connection to Server by typing a your client name in this form [#client_name#] and message:");
                         String message = in.nextLine();
                         try {
                             //Step1: send message to server to establish connection
@@ -78,8 +78,7 @@ public class Client {
                             System.out.println(feedback);
 
                             //Step5: message to send to Server with the 2nd client name in this form :"#client_name#" and message to 2nd client
-                          //  String feedback=new String(bytes,0,reply.getLength());
-                            System.out.println("Enter client name in this form [#client_name#] and message to send to the 2nd client");
+                            //System.out.println("Enter client name in this form [#client_name#] and message to send to the 2nd client");
                             String message_clientname=in.nextLine();
                             pktSend = new DatagramPacket(message_clientname.getBytes(), message_clientname.length(),InetAddress.getLocalHost(), 3000);
                             sktSend.send(pktSend);
