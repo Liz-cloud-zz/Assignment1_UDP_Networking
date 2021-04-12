@@ -24,7 +24,7 @@ public class Client {
                     byte[] buf = new byte[1024]; //create empty byte buffer
                     DatagramPacket pktReceive = new DatagramPacket(buf, buf.length); //create temporary empty packet
                     sktReceive.receive(pktReceive); //receive packet from socket and store in packet
-                    String msg = new String(pktReceive.getData(), 0, pktReceive.getLength()); //convert packet to message string
+                    String msg = new String(buf, 0, pktReceive.getLength()); //convert packet to message string
                     System.out.println("Server says: " + msg); //output message received
 
                     //Step9: reply message from client1 through server to verify that the message has been received
@@ -64,7 +64,7 @@ public class Client {
                         Scanner in = new Scanner(System.in);
                         System.out.println("Enter your ip address in this form:[0000.0000.0000.0000]");
                         String ip=in.nextLine();
-                        System.out.println("Establish connection to Server by typing a your client name,message  in this form [#client_name#,message]:");
+                        System.out.println("Establish connection to Server by typing a your client name in this form [#client_name#]:");
                         String message = in.nextLine();
                         try {
                             //Step1: send message to server to establish connection

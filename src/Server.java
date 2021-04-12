@@ -64,10 +64,8 @@ public class Server {
                     DatagramPacket pktReceive = new DatagramPacket(buf, buf.length); //create temporary empty packet
                     sktReceive.receive(pktReceive); //receive packet from socket and store in packet
                     message = new String(pktReceive.getData(), 0, pktReceive.getLength()); //convert packet to message string
-                    String []strings=message.split(",");
-                    client_name=strings[0];//get client name
-                    to_send=strings[1];//message  to send to client2
-                    System.out.println("Connection established! The client name is: " + client_name+" message :"+to_send); //output message received
+                    client_name=message;//get client name
+                    System.out.println("Connection established! The client name is: " + client_name); //output client name received
 
                     //Step3: verify to 1st client that you have seen the message by sending a message
                     InetAddress clientAddress = pktReceive.getAddress();//client1 ip
