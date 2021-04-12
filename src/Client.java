@@ -20,7 +20,7 @@ public class Client {
                 Scanner in=new Scanner(System.in);
                 while (running) {
                     //Step8: receive the message forwarded form client 1 through the server
-                    DatagramSocket sktReceive = new DatagramSocket(8080);
+                    DatagramSocket sktReceive = new DatagramSocket();
                     byte[] buf = new byte[1024]; //create empty byte buffer
                     DatagramPacket pktReceive = new DatagramPacket(buf, buf.length); //create temporary empty packet
                     sktReceive.receive(pktReceive); //receive packet from socket and store in packet
@@ -62,11 +62,13 @@ public class Client {
                     DatagramSocket sktSend = new DatagramSocket();
                     while (running) {
                         Scanner in = new Scanner(System.in);
+                        System.out.println("Enter your ip address in this form:[0000.0000.0000.0000]");
+                        String ip=in.nextLine();
                         System.out.println("Establish connection to Server by typing a your client name,message  in this form [#client_name#,message]:");
                         String message = in.nextLine();
                         try {
                             //Step1: send message to server to establish connection
-                            DatagramPacket pktSend = new DatagramPacket(message.getBytes(), message.length(), InetAddress.getLocalHost(), 3000);
+                            DatagramPacket pktSend = new DatagramPacket(message.getBytes(), message.length(), InetAddress.getByName(ip), 3000);
                             sktSend.send(pktSend);
 
 
@@ -80,7 +82,7 @@ public class Client {
                             //Step5: message to send to Server with the 2nd client name in this form :"#client_name#" and message to 2nd client
                             //System.out.println("Enter client name in this form [#client_name#] and message to send to the 2nd client");
                             String message_clientname=in.nextLine();
-                            pktSend = new DatagramPacket(message_clientname.getBytes(), message_clientname.length(),InetAddress.getLocalHost(), 3000);
+                            pktSend = new DatagramPacket(message_clientname.getBytes(), message_clientname.length(),InetAddress.getByName(ip), 3000);
                             sktSend.send(pktSend);
                            // System.out.println(feedback);
 
@@ -115,11 +117,5 @@ public class Client {
         //this receiver is for the second client
        new Thread(new Receiver()).start();
     }}
-//        public static void main(String[] args) {
-////        running = true;
-//
-//            new Thread(new Sender("Client",Handler.getServerPort())).start();
-//            new Thread(new Receiver("Client",Handler.getNewPort())).start();
-//        }
-//    }
+
 

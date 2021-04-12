@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 public class Server {
-    public static int PORT=8080;
     public static volatile boolean running;
     public static HashMap<String, Connector > hashMap =new HashMap<>();//Hash Map to store the different clients to  be contacted
     public static ArrayList<String> client_names=new ArrayList<>();//arraylist for the names of the clients
@@ -17,36 +16,36 @@ public class Server {
     }//to terminate thread for connection connection
 
 
-//    private static class Sender implements Runnable {
-//        @Override
-//        public void run() {
-//             running=true;
-//            try {
-//                DatagramSocket server_sender=new DatagramSocket();
-//                while (running){
-//                    Scanner in=new Scanner(System.in);
-//                    String message=in.nextLine();
-//                    try {
-//
-//                        DatagramPacket packet=new DatagramPacket(message.getBytes(), message.length(), InetAddress.getLocalHost(),8080);
-//                        server_sender.send(packet);
-//                    } catch (UnknownHostException e) {
-//                        e.printStackTrace();
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                    if(message.equals("end")){
-//                        end();
-////                        Thread.sleep((long)15);
-//                        continue;
-//                    }
-//                }
-//            } catch (SocketException e) {//| InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//
-//        }
-//    }
+    private static class Sender implements Runnable {
+        @Override
+        public void run() {
+             running=true;
+            try {
+                DatagramSocket server_sender=new DatagramSocket();
+                while (running){
+                    Scanner in=new Scanner(System.in);
+                    String message=in.nextLine();
+                    try {
+
+                        DatagramPacket packet=new DatagramPacket(message.getBytes(), message.length(), InetAddress.getLocalHost(),8080);
+                        server_sender.send(packet);
+                    } catch (UnknownHostException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    if(message.equals("end")){
+                        end();
+//                        Thread.sleep((long)15);
+                        continue;
+                    }
+                }
+            } catch (SocketException e) {//| InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
     private static class Receiver implements Runnable { //runnable class to allow user to constantly be able to receive packets
         @Override
         public void run() {
@@ -92,7 +91,8 @@ public class Server {
                     message= new String(pktReceive.getData(), 0, pktReceive.getLength()); //convert packet to message string
                     String []strings3=message.split(",");
                     client_name=strings3[0];//get client name
-                    to_send=strings3[1];//message  to send to client2
+                    ipAddress=strings3[1];
+                    to_send=strings3[2];//message  to send to client2
                     System.out.println("Client name is " + client_name+" "+"message to be send is:"+to_send); //output message received
                     int port=8090;//port of 2nd client to receive message
                     Connector c=new Connector(port,ipAddress);
@@ -159,7 +159,7 @@ public class Server {
         }
     }
     public static void main(String[] args){
-        //new Thread(new Server.Sender()).start();
+        new Thread(new Server.Sender()).start();
         // we should work using one thread for both sending and receiving otherwise the above changes wont be possible
         new Thread(new Server.Receiver()).start();
      }
