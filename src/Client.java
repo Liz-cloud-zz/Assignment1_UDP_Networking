@@ -84,7 +84,6 @@ public class Client {
                             String message_clientname=in.nextLine();
                             pktSend = new DatagramPacket(message_clientname.getBytes(), message_clientname.length(),InetAddress.getByName(ip), 3000);
                             sktSend.send(pktSend);
-                           // System.out.println(feedback);
 
                             //Step12: verification that server delivered your message to the other client and their reply
                             byte[] b=new byte[1024];
