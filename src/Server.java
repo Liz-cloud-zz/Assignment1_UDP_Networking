@@ -121,20 +121,23 @@ public class Server {
                         byte[] buffe = reply.getBytes();
                         start=message.indexOf('#');
                         end=message.lastIndexOf('#');
+                        ipAddress=message.replace("[^0-9]","");//get ip address
                         client_name=message.substring(start,end+1);//get client name
                         to_send=message.substring(end+1);//message  to send to client2
                         if(client_names.contains(client_name)){
                             Connector c2=hashMap.get(client_name);
                             DatagramPacket response1 = new DatagramPacket(buffe, buffe.length, c2.getAddress(), c2.getPort_number());
                             sktReceive.send(response1);
-                        }else {
-                            //send broadcast if unknown client is being requested
-                            message="Unknown client name :"+client_name+"client is probably off line";
-                            byte[] feedback=message.getBytes();
-                           for (Connector connector1: hashMap.values()){
-                               DatagramPacket response1 = new DatagramPacket(feedback, feedback.length, connector1.getAddress(), connector1.getPort_number());
-                               sktReceive.send(response1);
-                           }
+                        }else {//if its not an existing client add it to the client list then send message to it
+                            Connector c3=new Connector(8080,ipAddress);
+                            hashMap.put(client_name,c3);
+                            client_names.add(client_name);
+                            if(client_names.contains(client_name)) {
+                                Connector connector1 = hashMap.get(client_name);
+                                byte[] feedback=message.getBytes();
+                                DatagramPacket response1 = new DatagramPacket(feedback, feedback.length, connector1.getAddress(), connector1.getPort_number());
+                                sktReceive.send(response1);
+                            }
                         }
                     }
                     else {
